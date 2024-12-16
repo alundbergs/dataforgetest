@@ -3,6 +3,7 @@ uvicorn
 jinja2
 pydantic
 python-multipart
+psutil
 asyncio
 paho-mqtt==1.6.1
 opcua

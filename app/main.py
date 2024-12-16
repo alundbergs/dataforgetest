@@ -7,7 +7,7 @@ import csv
 import os
 import logging
 import subprocess
-# import psutil
+import psutil
 import asyncio
 import paho.mqtt.client as mqtt
 from datetime import datetime
@@ -49,13 +49,11 @@ ensure_csv(SELECTED_CSV, ["node_id", "description"])
 
 # Add these functions after the existing imports and before the routes
 
-
 def is_process_running(script_name):
-    try:
-        output = subprocess.check_output(["pgrep", "-f", script_name])
-        return len(output.strip()) > 0
-    except subprocess.CalledProcessError:
-        return False
+    for process in psutil.process_iter(['name', 'cmdline']):
+        if process.info['name'] == 'python' and script_name in process.info['cmdline']:
+            return True
+    return False
 
 def start_script(script_name):
     if not is_process_running(script_name):
@@ -64,13 +62,11 @@ def start_script(script_name):
     return False
 
 def stop_script(script_name):
-    try:
-        subprocess.run(["pkill", "-f", script_name], check=True)
-        return True
-    except subprocess.CalledProcessError:
-        return False
-    
-
+    for process in psutil.process_iter(['name', 'cmdline']):
+        if process.info['name'] == 'python' and script_name in process.info['cmdline']:
+            process.terminate()
+            return True
+    return False
 # API Models
 class Node(BaseModel):
     node_id: str
