@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Node Selection</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+    <script>
+        function toggleConverter(converter) {
+            fetch(`/toggle_${converter}`, {method: 'POST'})
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    location.reload(); // Reload the page to update status
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to toggle converter');
+                });
+        }
+
+        async function updateSelection(event) {
+            event.preventDefault();
+            const form = event.target;
+            const checkboxes = form.querySelectorAll('input[name="node_ids"]:checked');
+            const node_ids = Array.from(checkboxes).map(cb => cb.value);
+            try {
+                const response = await fetch('/update', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ node_ids: node_ids })
+                });
+                const result = await response.json();
+                if (result.error) {
+                    alert(result.error);
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while updating the selection.');
+            }
+        }
+
+        async function addNode(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+            const response = await fetch('/add_node', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            if (result.error) {
+                alert(result.error);
+            } else {
+                alert(result.message);
+                location.reload();
+            }
+        }
+    </script>
+</head>
+<body>
+    <a href="/logs"><button type="button">View Logs</button></a>
+    <h1>OPC UA to MQTT to InfluxDB Converter</h1>
+    
+    <!-- Add this section for converter status and controls -->
+    <div id="converter-status">
+        <h2>Converter Status</h2>
+        <p>OPC UA to MQTT: <span id="opcua-mqtt-status">{{ opcua_to_mqtt_status }}</span></p>
+        <button onclick="toggleConverter('opcua_to_mqtt')">Toggle OPC UA to MQTT</button>
+        
+        <p>MQTT to InfluxDB: <span id="mqtt-influx-status">{{ mqtt_to_influx_status }}</span></p>
+        <button onclick="toggleConverter('mqtt_to_influx')">Toggle MQTT to InfluxDB</button>
+    </div>
+    <h1>Node Selection</h1>
+    <form method="post" action="/update" onsubmit="updateSelection(event)">
+        <table>
+            <thead>
+                <tr>
+                    <th>Select</th>
+                    <th>Node ID</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for node in nodes %}
+                <tr>
+                    <td>
+                        <input type="checkbox" name="node_ids" value="{{ node.node_id }}"
+                        {% if node.node_id in selected %}checked{% endif %}>
+                    </td>
+                    <td>{{ node.node_id }}</td>
+                    <td>{{ node.description }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <button type="submit">Update Selection</button>
+    </form>
+
+    <h2>Add New Node</h2>
+    <form action="/add_node" method="post" onsubmit="addNode(event)">
+        <label for="node_id">Node ID:</label>
+        <input type="text" id="node_id" name="node_id" required><br><br>
+        <label for="description">Description:</label>
+        <input type="text" id="description" name="description" required><br><br>
+        <input type="submit" value="Add Node">
+    </form>
+</body>
+</html>

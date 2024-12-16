@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logs</title>
+    <script>
+        function clearLogs() {
+            fetch('/clear_logs', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    updateLogs();
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function filterLogs() {
+            const selectedScript = document.getElementById('scriptSelect').value;
+            const logSections = document.querySelectorAll('.log-section');
+
+            logSections.forEach(section => {
+                if (selectedScript === 'all' || section.id === selectedScript) {
+                    section.style.display = 'block';
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+        }
+
+        function updateLogs() {
+            fetch('/get_latest_logs')
+                .then(response => response.json())
+                .then(data => {
+                    for (const [script, logs] of Object.entries(data)) {
+                        const logSection = document.getElementById(script);
+                        if (logSection) {
+                            const pre = logSection.querySelector('pre');
+                            pre.innerHTML = logs.join('');
+                        }
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Update logs every 5 seconds
+        setInterval(updateLogs, 5000);
+
+        // Initial update
+        document.addEventListener('DOMContentLoaded', updateLogs);
+    </script>
+</head>
+<body>
+    <a href="/"><button type="button">Back to Main Page</button></a>
+    <h1>Logs</h1>
+    <button onclick="clearLogs()">Clear Logs</button>
+
+    <select id="scriptSelect" onchange="filterLogs()">
+        <option value="all">All Scripts</option>
+        <option value="Application">Application</option>
+        <option value="opcua_to_MQTT_Converter.py">OPC UA to MQTT Converter</option>
+        <option value="mqtt_to_Influx_Converter.py">MQTT to InfluxDB Converter</option>
+    </select>
+
+    <div id="logContent">
+        {% for script, log_entries in logs.items() %}
+            <div id="{{ script }}" class="log-section">
+                <h2>{{ script }}</h2>
+                <pre></pre>
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
