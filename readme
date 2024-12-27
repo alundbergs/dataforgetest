@@ -1,4 +1,18 @@
-$ git clone https://github.com/alundbergs/dataforgetest.git
-
+git clone https://github.com/TheGoodGamerGuy/dataforgetest.git
+cd dataforgetest/
 docker-compose up --build -d
 
+
+# ssh tunnel
+ssh -i <ssh-key> root@<droplet-ip> -L 8081:localhost:8080 -N
+# redirects localhost:8081 to <droplet-ip>:8080 without port forwarding
+
+
+# builds the project
+docker-compose build 
+
+# removes existing container
+docker-compose down
+
+# launches new container
+docker-compose up -d
