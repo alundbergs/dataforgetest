@@ -43,8 +43,7 @@
                 .catch(error => console.error('Error:', error));
         }
 
-        // Update logs every 5 seconds
-        setInterval(updateLogs, 5000);
+        setInterval(updateLogs, 1);
 
         // Initial update
         document.addEventListener('DOMContentLoaded', updateLogs);

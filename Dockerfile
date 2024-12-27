@@ -15,6 +15,6 @@ COPY ./app ./app
 EXPOSE 8080
 
 # Install psutil
-RUN apt-get update && apt-get install -y gcc python3-dev && pip install psutil
+# RUN apt-get update && apt-get install -y gcc python3-dev && pip install psutil
 # Run the FastAPI application
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]

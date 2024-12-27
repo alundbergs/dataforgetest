@@ -6,8 +6,6 @@ services:
     container_name: fastapi-app
     ports:
       - "8080:8080"
-    volumes:
-      - ./app:/app/app
     environment:
       - PYTHONUNBUFFERED=1
     extra_hosts:
