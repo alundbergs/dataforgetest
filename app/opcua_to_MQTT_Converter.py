@@ -5,7 +5,7 @@ import json
 import csv
 import os
 
-OPC_SERVER_URL = "opc.tcp://host.docker.internal:4841"
+OPC_SERVER_URL = "opc.tcp://100.94.111.58:4841"
 MQTT_BROKER = "host.docker.internal"
 MQTT_PORT = 1883
 MQTT_TOPIC = "plant1"
